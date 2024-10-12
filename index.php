@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split SumaVision and VeriMatrix</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #fileInput {
+            margin-bottom: 20px;
+        }
+        .result-container {
+            margin-top: 20px;
+        }
+        .numbers-list {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+        .numbers-list div {
+            width: 45%;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-top: 10px;
+        }
+        button.copy-btn {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button.copy-btn:active {
+            background-color: #45a049;
+        }
+        .count {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            margin-left: -125px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            font-size: 17px;
+        }
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;} 
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;} 
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <h1>UPLOAD EXCEL SHEET</h1>
+
+    <input type="file" id="fileInput" accept=".xlsx, .xls">
+    <button id="processBtn" disabled>Start</button>
+
+    <div id="output" class="result-container" style="display: none;">
+        <h3>Results:</h3>
+        <div class="numbers-list">
+            <div>
+                <h4>SumaVision</h4>
+                <textarea id="numbersStartingWith3" readonly></textarea>
+                <div class="count" id="countStartingWith3">Count: 0</div>
+                <button class="copy-btn" onclick="copyToClipboard('numbersStartingWith3', 'SumaVision')">Copy</button>
+            </div>
+            <div>
+                <h4>VeriMatrix</h4>
+                <textarea id="numbersStartingWith7" readonly></textarea>
+                <div class="count" id="countStartingWith7">Count: 0</div>
+                <button class="copy-btn" onclick="copyToClipboard('numbersStartingWith7', 'VeriMatrix')">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast message element -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let excelData = null;
+
+        document.getElementById('fileInput').addEventListener('change', handleFile, false);
+        document.getElementById('processBtn').addEventListener('click', () => {
+            if (excelData) {
+                processExcelData(excelData);
+            }
+        });
+
+        function handleFile(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // Store the Excel data for processing later
+                excelData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+                // Enable the Start button once the file is loaded
+                document.getElementById('processBtn').disabled = false;
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processExcelData(data) {
+            const numbersStartingWith3 = [];
+            const numbersStartingWith7 = [];
+            const searchString = 'TCCL CLASSIC PLUS SD';  // This is the base string to look for
+
+            data.forEach(row => {
+                if (row.length >= 10 && row[9] && row[9].includes(searchString)) { // Check if 10th column contains the base string
+                    const cell = row[4]; // 5th column (index 4)
+
+                    if (typeof cell === 'number' || !isNaN(parseFloat(cell))) {
+                        const numString = cell.toString();
+                        if (numString.startsWith('3')) {
+                            numbersStartingWith3.push(numString);
+                        }
+                        if (numString.startsWith('7')) {
+                            numbersStartingWith7.push(numString);
+                        }
+                    }
+                }
+            });
+
+            // Show the results section
+            document.getElementById('output').style.display = 'block';
+
+            // Display the results in text areas with numbers separated by commas
+            document.getElementById('numbersStartingWith3').value = numbersStartingWith3.join(', ');
+            document.getElementById('numbersStartingWith7').value = numbersStartingWith7.join(', ');
+
+            // Update the counts
+            document.getElementById('countStartingWith3').textContent = 'Count: ' + numbersStartingWith3.length;
+            document.getElementById('countStartingWith7').textContent = 'Count: ' + numbersStartingWith7.length;
+        }
+
+        function copyToClipboard(elementId, messageType) {
+            const textarea = document.getElementById(elementId);
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // For mobile devices
+
+            document.execCommand('copy');
+            showToast(messageType); // Show the toast message
+        }
+
+        function showToast(type) {
+            const toast = document.getElementById("toast");
+            toast.textContent = type === 'SumaVision' ? 'Copied for SumaVision' : 'Copied for VeriMatrix';
+            toast.className = "toast show";
+
+            // Remove the show class after 3 seconds
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+    </script>
+</body>
+</html>
