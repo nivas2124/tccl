@@ -82,10 +82,11 @@
     <!-- Filter dropdown for selecting the option -->
     <label for="filterSelect">Select Filter:</label>
     <select id="filterSelect">
-        <option value="TCCL CLASSIC PLUS SD">TCCL CLASSIC PLUS SD</option>
+        <option value="TCCL RURAL PACK">TCCL RURAL PACK</option>
         <option value="TCCL CLASSIC PACK">TCCL CLASSIC PACK</option>
-        <option value="TCCL TAMIL SD">TCCL TAMIL SD</option>
         <option value="TCCL CLASSIC PACK 1">TCCL CLASSIC PACK 1</option>
+        <option value="TCCL TAMIL SD">TCCL TAMIL SD</option>
+        <option value="TCCL VILLAGE SUPER"></option>        
     </select>
 
     <input type="file" id="fileInput" accept=".xlsx, .xls">
@@ -114,7 +115,7 @@
 
     <script>
         let excelData = null;
-        let selectedFilter = 'TCCL CLASSIC PLUS SD';  // Default filter value
+        let selectedFilter = 'TCCL CLASSIC PACK';  // Default filter value
 
         // Listen to the filter change event
         document.getElementById('filterSelect').addEventListener('change', function() {
