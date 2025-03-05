@@ -76,8 +76,17 @@
 <body>
     <center><h1>Split SumaVision and VeriMatrix for Tccl Classic Plus SD</h1></center>
 
-    <h4>goto TCCL WebPage --> Reports --> Total Customer Report -> Select STB Status as Active & Click Submit --> Click Download as Excel</h4>
-    <h4>open excel and Click File --> Save As --> Save as Type --> Excel Workbook(Xlsx)</h4>
+    <h4>Goto TCCL WebPage --> Reports --> Total Customer Report -> Select STB Status as Active & Click Submit --> Click Download as Excel</h4>
+    <h4>Open Excel and Click File --> Save As --> Save as Type --> Excel Workbook(Xlsx)</h4>
+
+    <!-- Filter dropdown for selecting the option -->
+    <label for="filterSelect">Select Filter:</label>
+    <select id="filterSelect">
+        <option value="TCCL CLASSIC PLUS SD">TCCL CLASSIC PLUS SD</option>
+        <option value="TCCL CLASSIC PACK">TCCL CLASSIC PACK</option>
+        <option value="TCCL TAMIL SD">TCCL TAMIL SD</option>
+        <option value="TCCL CLASSIC PACK 1">TCCL CLASSIC PACK 1</option>
+    </select>
 
     <input type="file" id="fileInput" accept=".xlsx, .xls">
     <button id="processBtn" disabled>Start</button>
@@ -105,6 +114,12 @@
 
     <script>
         let excelData = null;
+        let selectedFilter = 'TCCL CLASSIC PLUS SD';  // Default filter value
+
+        // Listen to the filter change event
+        document.getElementById('filterSelect').addEventListener('change', function() {
+            selectedFilter = this.value;
+        });
 
         document.getElementById('fileInput').addEventListener('change', handleFile, false);
         document.getElementById('processBtn').addEventListener('click', () => {
@@ -137,10 +152,9 @@
         function processExcelData(data) {
             const numbersStartingWith3 = [];
             const numbersStartingWith7 = [];
-            const searchString = 'TCCL CLASSIC PLUS SD';  // This is the base string to look for
 
             data.forEach(row => {
-                if (row.length >= 10 && row[9] && row[9].includes(searchString)) { // Check if 10th column contains the base string
+                if (row.length >= 10 && row[9] && row[9].includes(selectedFilter)) { // Check if 10th column contains the selected filter
                     const cell = row[4]; // 5th column (index 4)
 
                     if (typeof cell === 'number' || !isNaN(parseFloat(cell))) {
