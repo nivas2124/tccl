@@ -155,16 +155,21 @@
             const numbersStartingWith7 = [];
 
             data.forEach(row => {
-                if (row.length >= 10 && row[9] && row[9].includes(selectedFilter)) { // Check if 10th column contains the selected filter
-                    const cell = row[4]; // 5th column (index 4)
+                if (row.length >= 10 && row[9]) { // Check if 10th column exists
+                    const filterValue = row[9].trim();
 
-                    if (typeof cell === 'number' || !isNaN(parseFloat(cell))) {
-                        const numString = cell.toString();
-                        if (numString.startsWith('3')) {
-                            numbersStartingWith3.push(numString);
-                        }
-                        if (numString.startsWith('7')) {
-                            numbersStartingWith7.push(numString);
+                    // Only process rows that match the selected filter exactly, and exclude variants like "TCCL CLASSIC PACK 1"
+                    if (filterValue === selectedFilter) {
+                        const cell = row[4]; // 5th column (index 4)
+
+                        if (typeof cell === 'number' || !isNaN(parseFloat(cell))) {
+                            const numString = cell.toString();
+                            if (numString.startsWith('3')) {
+                                numbersStartingWith3.push(numString);
+                            }
+                            if (numString.startsWith('7')) {
+                                numbersStartingWith7.push(numString);
+                            }
                         }
                     }
                 }
